@@ -5,13 +5,15 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"strings"
-	//	"image/color"
 	"image/draw"
-	//	"image/jpeg"
 	"io/ioutil"
 	"log"
-	//	"os"
+	"regexp"
+	"strings"
+
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 	"github.com/tensorflow/tensorflow/tensorflow/go/op"
@@ -32,22 +34,20 @@ func makeTensorFromImage(filename string) (*tf.Tensor, image.Image, error) {
 		return nil, nil, err
 	}
 
-	// DecodeJpeg uses a scalar String-valued tensor as input.
 	tensor, err := tf.NewTensor(string(b))
 	if err != nil {
 		return nil, nil, err
 	}
-	// Creates a tensorflow graph to decode the jpeg image
 	graph, input, output, err := decodeJpegGraph()
 	if err != nil {
 		return nil, nil, err
 	}
-	// Execute that graph to decode this one image
 	session, err := tf.NewSession(graph, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 	defer session.Close()
+
 	normalized, err := session.Run(
 		map[tf.Output]*tf.Tensor{input: tensor},
 		[]tf.Output{output},
@@ -172,6 +172,7 @@ func main() {
 
 	tensor, i, err := makeTensorFromImage("./bird_mount_bluebird.jpg")
 	if err != nil {
+		fmt.Println("Here")
 		log.Fatal(err)
 	}
 
@@ -181,9 +182,10 @@ func main() {
 
 	inputop := graph.Operation("image_tensor")
 
-	o1 := graph.Operation("detection_scores")
-	o2 := graph.Operation("detection_classes")
-	o3 := graph.Operation("num_detections")
+	o1 := graph.Operation("detection_boxes")
+	o2 := graph.Operation("detection_scores")
+	o3 := graph.Operation("detection_classes")
+	o4 := graph.Operation("num_detections")
 
 	output, err := session.Run(
 		map[tf.Output]*tf.Tensor{
@@ -193,6 +195,7 @@ func main() {
 			o1.Output(0),
 			o2.Output(0),
 			o3.Output(0),
+			o4.Output(0),
 		},
 		nil)
 	if err != nil {
@@ -200,7 +203,8 @@ func main() {
 	}
 
 	probabilities := output[1].Value().([][]float32)[0]
-	//	classes := output[2].Value().([][]float32)[0]
+	classes := output[2].Value().([][]float32)[0]
 
-	fmt.Printf("%v", probabilities)
+	fmt.Println(probabilities)
+	fmt.Println(classes)
 }
