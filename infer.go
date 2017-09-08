@@ -1,10 +1,206 @@
 package main
 
 import (
-//tf "github.com/tensorflow/tensorflow/tensorflow/go"
-//"github.com/tensorflow/tensorflow/tensorflow/go/op"
+	"bufio"
+	"bytes"
+	"fmt"
+	"image"
+	"strings"
+	//	"image/color"
+	"image/draw"
+	//	"image/jpeg"
+	"io/ioutil"
+	"log"
+	//	"os"
+
+	tf "github.com/tensorflow/tensorflow/tensorflow/go"
+	"github.com/tensorflow/tensorflow/tensorflow/go/op"
 )
 
-func add() {
-	return
+var labels []string
+
+func makeTensorFromImage(filename string) (*tf.Tensor, image.Image, error) {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	r := bytes.NewReader(b)
+	img, _, err := image.Decode(r)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// DecodeJpeg uses a scalar String-valued tensor as input.
+	tensor, err := tf.NewTensor(string(b))
+	if err != nil {
+		return nil, nil, err
+	}
+	// Creates a tensorflow graph to decode the jpeg image
+	graph, input, output, err := decodeJpegGraph()
+	if err != nil {
+		return nil, nil, err
+	}
+	// Execute that graph to decode this one image
+	session, err := tf.NewSession(graph, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer session.Close()
+	normalized, err := session.Run(
+		map[tf.Output]*tf.Tensor{input: tensor},
+		[]tf.Output{output},
+		nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	return normalized[0], img, nil
+}
+
+func decodeJpegGraph() (graph *tf.Graph, input, output tf.Output, err error) {
+	s := op.NewScope()
+	input = op.Placeholder(s, tf.String)
+	output = op.ExpandDims(s,
+		op.DecodeJpeg(s, input, op.DecodeJpegChannels(3)),
+		op.Const(s.SubScope("make_batch"), int32(0)))
+	graph, err = s.Finalize()
+	return graph, input, output, err
+}
+
+func loadLabels() {
+	file, err := Asset("models/ssd_mobilenet_v1_coco/labels.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s := string(file[:])
+
+	reader := strings.NewReader(s)
+	scanner := bufio.NewScanner(reader)
+
+	scanner.Split(bufio.ScanWords)
+
+	for scanner.Scan() {
+		var newlabel string = regexp.MustCompile("[^a-z]+").ReplaceAllString(scanner.Text(), "")
+		labels = append(labels, newlabel)
+	}
+}
+
+/*
+func executegraph(inputimage string) string {
+	model, err := Asset("models/ssd_mobilenet_v1_coco/frozen_inference_graph.pb")
+	if err != nil {
+		log.Fatal(err)
+	}
+	labels, err := Asset("models/ssd_mobilenet_v1_coco/labels.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	loadLabels(labels)
+
+	graph := tf.NewGraph()
+	if err := graph.Import(model, ""); err != nil {
+		log.Fatal(err)
+	}
+
+	session, err := tf.NewSession(graph, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+
+	tensor, i, err := makeTensorFromImage(inputimage)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b := i.Bounds()
+	img := image.NewRGBA(b)
+	draw.Draw(img, b, i, b.Min, draw.Src)
+
+	inputop := graph.Operation("image_tensor")
+
+	o1 := graph.Operation("detection_scores")
+	o2 := graph.Operation("detection_classes")
+	o3 := graph.Operation("num_detections")
+
+	output, err := session.Run(
+		map[tf.Output]*tf.Tensor{
+			inputop.Output(0): tensor,
+		},
+		[]tf.Output{
+			o1.Output(0),
+			o2.Output(0),
+			o3.Output(0),
+		},
+		nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	probabilities := output[1].Value().([][]float32)[0]
+	classes := output[2].Value().([][]float32)[0]
+
+	return probabilities
+}
+*/
+
+func main() {
+	model, err := Asset("models/ssd_mobilenet_v1_coco/frozen_inference_graph.pb")
+	if err != nil {
+		log.Fatal(err)
+	}
+	/*
+		labels, err := Asset("models/ssd_mobilenet_v1_coco/labels.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+	*/
+	loadLabels()
+
+	graph := tf.NewGraph()
+	if err := graph.Import(model, ""); err != nil {
+		log.Fatal(err)
+	}
+
+	session, err := tf.NewSession(graph, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+
+	tensor, i, err := makeTensorFromImage("./bird_mount_bluebird.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b := i.Bounds()
+	img := image.NewRGBA(b)
+	draw.Draw(img, b, i, b.Min, draw.Src)
+
+	inputop := graph.Operation("image_tensor")
+
+	o1 := graph.Operation("detection_scores")
+	o2 := graph.Operation("detection_classes")
+	o3 := graph.Operation("num_detections")
+
+	output, err := session.Run(
+		map[tf.Output]*tf.Tensor{
+			inputop.Output(0): tensor,
+		},
+		[]tf.Output{
+			o1.Output(0),
+			o2.Output(0),
+			o3.Output(0),
+		},
+		nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	probabilities := output[1].Value().([][]float32)[0]
+	//	classes := output[2].Value().([][]float32)[0]
+
+	fmt.Printf("%v", probabilities)
 }
