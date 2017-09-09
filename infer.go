@@ -2,10 +2,7 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
-	"image"
-	"image/draw"
 	"io/ioutil"
 	"log"
 	"regexp"
@@ -21,30 +18,23 @@ import (
 
 var labels []string
 
-func makeTensorFromImage(filename string) (*tf.Tensor, image.Image, error) {
+func makeTensorFromImage(filename string) (*tf.Tensor, error) {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, nil, err
-	}
-
-	r := bytes.NewReader(b)
-	img, _, err := image.Decode(r)
-
-	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	tensor, err := tf.NewTensor(string(b))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	graph, input, output, err := decodeJpegGraph()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	session, err := tf.NewSession(graph, nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer session.Close()
 
@@ -53,9 +43,9 @@ func makeTensorFromImage(filename string) (*tf.Tensor, image.Image, error) {
 		[]tf.Output{output},
 		nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return normalized[0], img, nil
+	return normalized[0], nil
 }
 
 func decodeJpegGraph() (graph *tf.Graph, input, output tf.Output, err error) {
@@ -89,76 +79,11 @@ func loadLabels() {
 	}
 }
 
-/*
-func executegraph(inputimage string) string {
-	model, err := Asset("models/ssd_mobilenet_v1_coco/frozen_inference_graph.pb")
-	if err != nil {
-		log.Fatal(err)
-	}
-	labels, err := Asset("models/ssd_mobilenet_v1_coco/labels.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	loadLabels(labels)
-
-	graph := tf.NewGraph()
-	if err := graph.Import(model, ""); err != nil {
-		log.Fatal(err)
-	}
-
-	session, err := tf.NewSession(graph, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer session.Close()
-
-	tensor, i, err := makeTensorFromImage(inputimage)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	b := i.Bounds()
-	img := image.NewRGBA(b)
-	draw.Draw(img, b, i, b.Min, draw.Src)
-
-	inputop := graph.Operation("image_tensor")
-
-	o1 := graph.Operation("detection_scores")
-	o2 := graph.Operation("detection_classes")
-	o3 := graph.Operation("num_detections")
-
-	output, err := session.Run(
-		map[tf.Output]*tf.Tensor{
-			inputop.Output(0): tensor,
-		},
-		[]tf.Output{
-			o1.Output(0),
-			o2.Output(0),
-			o3.Output(0),
-		},
-		nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	probabilities := output[1].Value().([][]float32)[0]
-	classes := output[2].Value().([][]float32)[0]
-
-	return probabilities
-}
-*/
-
 func infer(inputimage string) ([]float32, []float32) {
 	model, err := Asset("models/ssd_mobilenet_v1_coco/frozen_inference_graph.pb")
 	if err != nil {
 		log.Fatal(err)
 	}
-	/*
-		labels, err := Asset("models/ssd_mobilenet_v1_coco/labels.txt")
-		if err != nil {
-			log.Fatal(err)
-		}
-	*/
 	loadLabels()
 
 	graph := tf.NewGraph()
@@ -172,15 +97,11 @@ func infer(inputimage string) ([]float32, []float32) {
 	}
 	defer session.Close()
 
-	tensor, i, err := makeTensorFromImage(inputimage)
+	tensor, err := makeTensorFromImage(inputimage)
 	if err != nil {
 		fmt.Println("Here")
 		log.Fatal(err)
 	}
-
-	b := i.Bounds()
-	img := image.NewRGBA(b)
-	draw.Draw(img, b, i, b.Min, draw.Src)
 
 	inputop := graph.Operation("image_tensor")
 
