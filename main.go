@@ -1,16 +1,17 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	//	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 	//	"github.com/tensorflow/tensorflow/tensorflow/go/op"
 	//	"io/ioutil"
-	"html/template"
-	"log"
-	"net/http"
+	//	"html/template"
+	//	"log"
+	//	"net/http"
 	//"os"
 )
 
+/*
 var indextmpl *template.Template
 var loadingtmpl *template.Template
 var resultstmpl *template.Template
@@ -28,13 +29,18 @@ func init() {
 	loadingtmpl = template.Must(template.New("loadingtmpl").Parse(string(loading)))
 	resultstmpl = template.Must(template.New("resultstmpl").Parse(string(results)))
 }
-
+*/
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		indextmpl.Execute(w, map[string]string{"": ""})
-		loadingtmpl.Execute(w, map[string]string{"": ""})
-		resultstmpl.Execute(w, map[string]string{"": ""})
-	})
+	/*
+		http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+			indextmpl.Execute(w, map[string]string{"": ""})
+			loadingtmpl.Execute(w, map[string]string{"": ""})
+			resultstmpl.Execute(w, map[string]string{"": ""})
+		})
 
-	log.Fatal(http.ListenAndServe(":8000", nil))
+
+		log.Fatal(http.ListenAndServe(":8000", nil))
+	*/
+
+	fmt.Println(getinference("./bird_mount_bluebird.jpg"))
 }

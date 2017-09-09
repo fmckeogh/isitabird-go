@@ -146,7 +146,7 @@ func executegraph(inputimage string) string {
 }
 */
 
-func main() {
+func getinference(inputimage string) ([]float32, []float32) {
 	model, err := Asset("models/ssd_mobilenet_v1_coco/frozen_inference_graph.pb")
 	if err != nil {
 		log.Fatal(err)
@@ -170,7 +170,7 @@ func main() {
 	}
 	defer session.Close()
 
-	tensor, i, err := makeTensorFromImage("./bird_mount_bluebird.jpg")
+	tensor, i, err := makeTensorFromImage(inputimage)
 	if err != nil {
 		fmt.Println("Here")
 		log.Fatal(err)
@@ -202,9 +202,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	probabilities := output[1].Value().([][]float32)[0]
-	classes := output[2].Value().([][]float32)[0]
+	probabilities := (output[1].Value().([][]float32)[0])[0:5]
+	classes := (output[2].Value().([][]float32)[0])[0:5]
 
-	fmt.Println(probabilities)
-	fmt.Println(classes)
+	return probabilities, classes
 }
