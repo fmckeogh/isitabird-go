@@ -5,5 +5,4 @@ User flow:
 Upload image -> Loading screen -> Results
 
 Building:
-go-bindata models/... pages/... static/...
-go buil
+go-bindata models/... pages/... static/... && go build
