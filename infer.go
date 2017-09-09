@@ -82,8 +82,10 @@ func loadLabels() {
 	scanner.Split(bufio.ScanWords)
 
 	for scanner.Scan() {
-		var newlabel string = regexp.MustCompile("[^a-z]+").ReplaceAllString(scanner.Text(), "")
-		labels = append(labels, newlabel)
+		var newlabel string = regexp.MustCompile("[^a-z-]+").ReplaceAllString(scanner.Text(), "")
+		if len(newlabel) != 0 {
+			labels = append(labels, newlabel)
+		}
 	}
 }
 
@@ -146,7 +148,7 @@ func executegraph(inputimage string) string {
 }
 */
 
-func getinference(inputimage string) ([]float32, []float32) {
+func infer(inputimage string) ([]float32, []float32) {
 	model, err := Asset("models/ssd_mobilenet_v1_coco/frozen_inference_graph.pb")
 	if err != nil {
 		log.Fatal(err)
