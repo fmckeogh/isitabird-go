@@ -19,6 +19,11 @@ var resultsfile []byte
 
 var err error
 
+type ResultsData struct {
+	IsBird        bool
+	ResultsString string
+}
+
 func init() {
 	loadLabels()
 
@@ -43,7 +48,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func resultsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r)
-	resultstmpl.Execute(w, nil)
+
+	d := ResultsData{IsBird: false, ResultsString: "523%%%%dgsgsdgw       &&&&,,,,,,&7,7,7jksndfhakfnadtever"}
+
+	resultstmpl.Execute(w, d)
 }
 
 func main() {
