@@ -42,12 +42,11 @@ func init() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r)
+
 	indextmpl.Execute(w, nil)
 }
 
 func resultsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r)
 
 	d := ResultsData{IsBird: false, ResultsString: "523%%%%dgsgsdgw       &&&&,,,,,,&7,7,7jksndfhakfnadtever"}
 
