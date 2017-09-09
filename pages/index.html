@@ -12,8 +12,9 @@
 			</div>
 			<hr/>
 			<div>
-				<form action="upload" method="post" enctype="multipart/form-data">
-					<input type="file" name="file"><br /><br />
+				<form action="/upload" method="post" enctype="multipart/form-data">
+					<input type="file" name="uploadfile"><br/><br/>
+					<input type="hidden" name="token" value="{{.Token}}"/>
 					<input type="submit" value="Upload">
 				</form>
 			</div>
