@@ -2,41 +2,56 @@ package main
 
 import (
 	"fmt"
-	//	tf "github.com/tensorflow/tensorflow/tensorflow/go"
-	//	"github.com/tensorflow/tensorflow/tensorflow/go/op"
-	//	"io/ioutil"
-	//	"html/template"
-	//	"log"
-	//	"net/http"
-	//"os"
+	"html/template"
+	"log"
+
+	_ "errors"
+	_ "io/ioutil"
+	"net/http"
+	_ "os"
 )
 
-/*
 var indextmpl *template.Template
 var resultstmpl *template.Template
 
-func init() {
-	index, err := Asset("pages/index.html")
-	results, err := Asset("pages/results.html")
+var indexfile []byte
+var resultsfile []byte
 
+var err error
+
+func init() {
+	loadLabels()
+
+	indexfile, err = Asset("pages/index.html")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	indextmpl = template.Must(template.New("indextmpl").Parse(string(index)))
-	resultstmpl = template.Must(template.New("resultstmpl").Parse(string(results)))
+	resultsfile, err = Asset("pages/results.html")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-}*/
+	indextmpl = template.Must(template.New("indextmpl").Parse(string(indexfile)))
+	resultstmpl = template.Must(template.New("resultstmpl").Parse(string(resultsfile)))
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r)
+	indextmpl.Execute(w, nil)
+}
+
+func resultsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r)
+	resultstmpl.Execute(w, nil)
+}
 
 func main() {
-	/*
-		http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-			indextmpl.Execute(w, map[string]string{"": ""})
-			resultstmpl.Execute(w, map[string]string{"": ""})
-		})
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/results", resultsHandler)
 
-		log.Fatal(http.ListenAndServe(":8000", nil))
-	*/
-	fmt.Println(infer("./bird_mount_bluebird.jpg"))
-	fmt.Println(labels[181])
+	log.Fatal(http.ListenAndServe(":8000", nil))
+
+	//	fmt.Println(infer("./bird_mount_bluebird.jpg"))
+	//	fmt.Println(string(index))
 }

@@ -84,7 +84,6 @@ func infer(inputimage string) ([]float32, []float32) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	loadLabels()
 
 	graph := tf.NewGraph()
 	if err := graph.Import(model, ""); err != nil {
