@@ -102,10 +102,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		var buffer bytes.Buffer
 
 		for i := 0; i < 5; i++ {
-			buffer.WriteString(" " + strconv.FormatFloat(float64(probabilities[i]*100), 'f', 2, 64) + "% ")
+			buffer.WriteString(strconv.FormatFloat(float64(probabilities[i]*100), 'f', 2, 64) + "% ")
 			buffer.WriteString((labels[int(classes[i])]))
 			if i != 4 {
-				buffer.WriteString(",")
+				buffer.WriteString(", ")
 			}
 		}
 
