@@ -1,5 +1,5 @@
 # isitabird-go
-Is it a bird? tools written ported to Go.
+Determines whether uploaded image is of a bird or not a bird, using TensorFlow and a self-contained webserver.
 
 ### Building
 ```
