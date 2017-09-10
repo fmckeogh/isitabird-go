@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"regexp"
 	"strings"
@@ -18,13 +17,14 @@ import (
 
 var labels []string
 
-func makeTensorFromImage(filename string) (*tf.Tensor, error) {
-	b, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	tensor, err := tf.NewTensor(string(b))
+func makeTensorFromImage(file []byte) (*tf.Tensor, error) {
+	/*
+		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, err
+		}
+	*/
+	tensor, err := tf.NewTensor(string(file))
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func loadLabels() {
 	}
 }
 
-func infer(inputimage string) ([]float32, []float32) {
+func infer(inputimage []byte) ([]float32, []float32) {
 	model, err := Asset("models/ssd_mobilenet_v1_coco/frozen_inference_graph.pb")
 	if err != nil {
 		log.Fatal(err)
