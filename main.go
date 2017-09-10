@@ -93,6 +93,9 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		buf.ReadFrom(file)
 		probabilities, classes := infer(buf.Bytes())
 
+		buf.Reset()
+		file.Close()
+
 		if classes[0] == 16 {
 			IsBird = true
 		} else {
