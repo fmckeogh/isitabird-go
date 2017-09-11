@@ -19,19 +19,21 @@ var resultsfile []byte
 
 var err error
 
+/*
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const (
 	letterIdxBits = 6                    // 6 bits to represent a letter index
 	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
 	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 )
+*/
 
 type Data struct {
 	IsBird        bool
 	ResultsString string
 }
 
-var Token string
+//var Token string
 var IsBird bool
 var ResultsString string
 
@@ -54,6 +56,7 @@ func init() {
 	resultstmpl = template.Must(template.New("resultstmpl").Parse(string(resultsfile)))
 }
 
+/*
 func genToken() string { // Note: this function will fail after the year 2262, so it ain't my problem.
 	b := make([]byte, 64)
 
@@ -70,16 +73,17 @@ func genToken() string { // Note: this function will fail after the year 2262, s
 	}
 	return string(b)
 }
+*/
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	//token := genToken()
-	token := "testing"
+	//token := "testing"
 
 	if r.Method == "GET" {
-		indextmpl.Execute(w, token)
+		indextmpl.Execute(w, nil)
 	} else {
 		r.ParseMultipartForm(32 << 20)
-		file, handler, err := r.FormFile(("uploadfile-" + token))
+		file, handler, err := r.FormFile(("uploadfile"))
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -128,8 +132,6 @@ func resultsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println(genToken())
-
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/results", resultsHandler)
 
