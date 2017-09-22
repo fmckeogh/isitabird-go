@@ -2,7 +2,8 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	//	"encoding/hex"
+	//	"errors"
 	"log"
 	"regexp"
 	"strings"
@@ -17,9 +18,34 @@ import (
 
 var labels []string
 
+/*
+func checkFileType(file []byte) error {
+
+	jpegheader, err := hex.DecodeString("FFD8FFE1")
+	if err != nil {
+		return err
+	}
+
+	var fileheader []byte
+
+	copy(fileheader[:], file[:4])
+
+	if fileheader != jpegheader {
+		return errors.New("Not valid JPEG image")
+	} else {
+		return nil
+	}
+}
+*/
 func makeTensorFromImage(file []byte) (*tf.Tensor, error) {
 	/*
 		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, err
+		}
+	*/
+	/*
+		err := checkFileType(file)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +124,6 @@ func infer(inputimage []byte) ([]float32, []float32) {
 
 	tensor, err := makeTensorFromImage(inputimage)
 	if err != nil {
-		fmt.Println("Here")
 		log.Fatal(err)
 	}
 
